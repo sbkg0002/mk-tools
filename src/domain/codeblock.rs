@@ -14,10 +14,12 @@ impl TextSpan {
         Self { start, end }
     }
 
+    #[allow(dead_code)]
     pub fn len(&self) -> usize {
         self.end.saturating_sub(self.start)
     }
 
+    #[allow(dead_code)]
     pub fn is_empty(&self) -> bool {
         self.start >= self.end
     }
@@ -68,6 +70,7 @@ pub struct CodeblockSpec {
     pub existing_block_span: Option<TextSpan>,
 
     /// The raw marker text for debugging/error messages
+    #[allow(dead_code)]
     pub raw_marker: String,
 }
 

@@ -12,6 +12,7 @@ pub fn resolve_path(path: &Path, base: &Path) -> PathBuf {
 }
 
 /// Get the parent directory of a file, or use current directory if none
+#[allow(dead_code)]
 pub fn get_base_dir(file_path: &Path) -> PathBuf {
     file_path
         .parent()
@@ -21,6 +22,7 @@ pub fn get_base_dir(file_path: &Path) -> PathBuf {
 }
 
 /// Normalize a path by canonicalizing it if possible
+#[allow(dead_code)]
 pub fn normalize_path(path: &Path) -> Result<PathBuf> {
     path.canonicalize()
         .with_context(|| format!("Failed to normalize path: {}", path.display()))

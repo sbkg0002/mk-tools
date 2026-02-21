@@ -2,18 +2,13 @@ use crate::domain::codeblock::TextSpan;
 use std::path::PathBuf;
 
 /// Style of the table of contents list
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TocStyle {
     /// Bullet list style (using `-`)
+    #[default]
     Bullet,
     /// Numbered list style (using `1.`)
     Numbered,
-}
-
-impl Default for TocStyle {
-    fn default() -> Self {
-        Self::Bullet
-    }
 }
 
 impl TocStyle {
@@ -54,25 +49,30 @@ impl Default for TocOptions {
 }
 
 impl TocOptions {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self::default()
     }
 
+    #[allow(dead_code)]
     pub fn with_from_level(mut self, level: u8) -> Self {
         self.from_level = level;
         self
     }
 
+    #[allow(dead_code)]
     pub fn with_to_level(mut self, level: u8) -> Self {
         self.to_level = level;
         self
     }
 
+    #[allow(dead_code)]
     pub fn with_style(mut self, style: TocStyle) -> Self {
         self.style = style;
         self
     }
 
+    #[allow(dead_code)]
     pub fn with_root(mut self, root: Option<PathBuf>) -> Self {
         self.root = root;
         self
@@ -94,15 +94,18 @@ pub struct TocRegionSpec {
     pub end_span: TextSpan,
 
     /// Line number where the start marker appears (1-based)
+    #[allow(dead_code)]
     pub start_line: usize,
 
     /// Line number where the end marker appears (1-based)
+    #[allow(dead_code)]
     pub end_line: usize,
 
     /// Options parsed from the start marker
     pub options: TocOptions,
 
     /// The raw start marker text for debugging
+    #[allow(dead_code)]
     pub raw_start_marker: String,
 }
 
@@ -162,6 +165,7 @@ impl Heading {
         }
     }
 
+    #[allow(dead_code)]
     pub fn with_anchor(mut self, anchor: String) -> Self {
         self.anchor = anchor;
         self

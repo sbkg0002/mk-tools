@@ -32,7 +32,7 @@ pub fn find_codeblock_markers(
     for (line_idx, line) in lines.iter().enumerate() {
         let line_number = line_idx + 1;
         let line_start = byte_offset;
-        let line_end = byte_offset + line.len();
+        let _line_end = byte_offset + line.len();
 
         if let Some(captures) = marker_regex.captures(line) {
             let full_match = captures.get(0).unwrap();
@@ -223,8 +223,6 @@ pub fn generate_code_block(content: &str, lang: Option<&str>) -> String {
 /// Apply codeblock updates to markdown content
 pub fn apply_codeblock_updates(original_content: &str, specs: &[CodeblockSpec]) -> Result<String> {
     let mut result = original_content.to_string();
-    let mut offset_delta: i64 = 0;
-
     // Process specs in order (we'll track offset changes)
     // For simplicity, we process from end to start to avoid offset issues
     let mut sorted_specs: Vec<&CodeblockSpec> = specs.iter().collect();

@@ -18,7 +18,7 @@ pub fn find_toc_regions(content: &str) -> Result<Vec<TocRegionSpec>> {
     for (line_idx, line) in lines.iter().enumerate() {
         let line_number = line_idx + 1;
         let line_start = byte_offset;
-        let line_end = byte_offset + line.len();
+        let _line_end = byte_offset + line.len();
 
         // Check for start marker
         if let Some(captures) = start_regex.captures(line) {

@@ -166,7 +166,7 @@ mod tests {
         let file_path = dir.path().join("single.md");
         write_file(&file_path, "content").unwrap();
 
-        let files = discover_markdown_files(&[file_path.clone()], "**/*.md").unwrap();
+        let files = discover_markdown_files(std::slice::from_ref(&file_path), "**/*.md").unwrap();
 
         assert_eq!(files.len(), 1);
         assert_eq!(files[0], file_path);

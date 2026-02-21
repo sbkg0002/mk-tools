@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use std::env;
-use std::path::PathBuf;
+use std::path::Path;
 use std::process;
 
 mod cli;
@@ -105,11 +105,7 @@ fn handle_codeblocks(args: CodeblocksArgs, dry_run: bool) -> Result<()> {
     Ok(())
 }
 
-fn process_codeblocks_file(
-    file_path: &PathBuf,
-    args: &CodeblocksArgs,
-    dry_run: bool,
-) -> Result<bool> {
+fn process_codeblocks_file(file_path: &Path, args: &CodeblocksArgs, dry_run: bool) -> Result<bool> {
     // Read the file
     let content = fs::read_file(file_path)?;
 
@@ -204,7 +200,7 @@ fn handle_toc(args: TocArgs, dry_run: bool) -> Result<()> {
     Ok(())
 }
 
-fn process_toc_file(file_path: &PathBuf, args: &TocArgs, dry_run: bool) -> Result<bool> {
+fn process_toc_file(file_path: &Path, args: &TocArgs, dry_run: bool) -> Result<bool> {
     // Read the file
     let content = fs::read_file(file_path)?;
 
@@ -285,7 +281,7 @@ fn handle_check(args: CheckArgs) -> Result<()> {
     Ok(())
 }
 
-fn check_file(file_path: &PathBuf, args: &CheckArgs) -> Result<bool> {
+fn check_file(file_path: &Path, args: &CheckArgs) -> Result<bool> {
     let content = fs::read_file(file_path)?;
 
     // Check codeblocks
