@@ -1,0 +1,35 @@
+[package]
+name = "mk-tools"
+version = "0.1.0"
+edition = "2021"
+authors = ["sbkg0002"]
+description = "A CLI tool for managing Markdown files with code block synchronization and TOC generation"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/sbkg0002/mk-tools"
+readme = "README.md"
+keywords = ["markdown", "cli", "documentation", "code-blocks", "toc"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+clap = { version = "4.5", features = ["derive", "cargo"] }
+anyhow = "1.0"
+thiserror = "1.0"
+regex = "1.10"
+glob = "0.3"
+walkdir = "2.5"
+env_logger = "0.11"
+log = "0.4"
+
+[dev-dependencies]
+tempfile = "3.10"
+assert_cmd = "2.0"
+predicates = "3.1"
+
+[[bin]]
+name = "mk-tools"
+path = "src/main.rs"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1

@@ -1,0 +1,56 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# Backup files created by mk-tools
+*.bak
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.iml
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Testing
+.coverage
+*.profdata
+*.profraw
+
+# Documentation
+/docs/**/*.bak
+
+# Release artifacts
+/dist/
+*.tar.gz
+*.zip
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+
+# Temporary files
+/tmp/
