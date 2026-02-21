@@ -2,7 +2,7 @@ use crate::domain::codeblock::TextSpan;
 use crate::domain::toc::{make_anchors_unique, Heading, TocOptions, TocRegionSpec, TocStyle};
 use anyhow::{Context, Result};
 use regex::Regex;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Find all TOC regions in markdown content
 pub fn find_toc_regions(content: &str) -> Result<Vec<TocRegionSpec>> {
@@ -141,6 +141,103 @@ pub fn extract_headings(content: &str) -> Vec<Heading> {
     headings
 }
 
+/// Heading with file path information for cross-file TOC
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HeadingWithFile {
+    pub heading: Heading,
+    pub file_path: PathBuf,
+}
+
+impl HeadingWithFile {
+    /// Generate a markdown link with file path
+    pub fn to_link(&self, base_path: Option<&Path>) -> String {
+        let file_str = if let Some(base) = base_path {
+            self.file_path
+                .strip_prefix(base)
+                .unwrap_or(&self.file_path)
+                .to_string_lossy()
+                .to_string()
+        } else {
+            self.file_path.to_string_lossy().to_string()
+        };
+
+        format!(
+            "[{}]({}#{})",
+            self.heading.text, file_str, self.heading.anchor
+        )
+    }
+}
+
+/// Extract headings from multiple files for cross-file TOC
+pub fn extract_headings_from_files(file_paths: &[PathBuf]) -> Result<Vec<HeadingWithFile>> {
+    let mut all_headings = Vec::new();
+
+    for file_path in file_paths {
+        let content = crate::fs::read_file(file_path)?;
+        let headings = extract_headings(&content);
+
+        for heading in headings {
+            all_headings.push(HeadingWithFile {
+                heading,
+                file_path: file_path.clone(),
+            });
+        }
+    }
+
+    Ok(all_headings)
+}
+
+/// Generate cross-file TOC from headings with file paths
+pub fn generate_cross_file_toc(
+    headings: &[HeadingWithFile],
+    options: &TocOptions,
+    base_path: Option<&Path>,
+) -> String {
+    // Filter headings by level
+    let filtered: Vec<&HeadingWithFile> = headings
+        .iter()
+        .filter(|h| options.includes_level(h.heading.level))
+        .collect();
+
+    if filtered.is_empty() {
+        return String::new();
+    }
+
+    let mut lines = Vec::new();
+    let mut current_file: Option<&Path> = None;
+
+    for heading_with_file in filtered {
+        // Add file separator if we're starting a new file
+        if current_file != Some(heading_with_file.file_path.as_path()) {
+            if !lines.is_empty() {
+                lines.push(String::new()); // Blank line between files
+            }
+            current_file = Some(&heading_with_file.file_path);
+        }
+
+        let indent_level = (heading_with_file
+            .heading
+            .level
+            .saturating_sub(options.from_level)) as usize;
+        let indent = "  ".repeat(indent_level);
+
+        let list_marker = match options.style {
+            TocStyle::Bullet => "-",
+            TocStyle::Numbered => "1.",
+        };
+
+        let line = format!(
+            "{}{} {}",
+            indent,
+            list_marker,
+            heading_with_file.to_link(base_path)
+        );
+        lines.push(line);
+    }
+
+    lines.join("\n")
+}
+
 /// Generate TOC content from headings
 pub fn generate_toc(headings: &[Heading], options: &TocOptions) -> String {
     // Filter headings by level
@@ -212,6 +309,38 @@ pub fn check_toc_up_to_date(original_content: &str, regions: &[TocRegionSpec]) -
     let headings = extract_headings(original_content);
     let updated_content = apply_toc_updates(original_content, regions, &headings)?;
     Ok(original_content == updated_content)
+}
+
+/// Insert TOC markers after the first H1 heading if no TOC regions exist
+pub fn insert_toc_markers_after_h1(content: &str) -> Result<String> {
+    let h1_regex = Regex::new(r"^#\s+.+$").unwrap();
+    let lines: Vec<&str> = content.lines().collect();
+
+    // Find the first H1 heading
+    for (idx, line) in lines.iter().enumerate() {
+        if h1_regex.is_match(line) {
+            // Found H1, insert TOC markers after it
+            let new_lines = lines.clone();
+
+            // Insert empty line, TOC markers, and another empty line after the H1
+            let insert_lines = vec!["", "<!-- mk-toc:start -->", "<!-- mk-toc:end -->", ""];
+
+            // Insert after the H1 line (idx + 1)
+            let insert_pos = idx + 1;
+
+            // Build the result
+            let mut result_lines = Vec::new();
+            result_lines.extend_from_slice(&new_lines[..insert_pos]);
+            result_lines.extend(insert_lines);
+            result_lines.extend_from_slice(&new_lines[insert_pos..]);
+
+            return Ok(result_lines.join("\n"));
+        }
+    }
+
+    // No H1 found, insert at the beginning
+    let markers = "<!-- mk-toc:start -->\n<!-- mk-toc:end -->\n\n";
+    Ok(format!("{}{}", markers, content))
 }
 
 #[cfg(test)]

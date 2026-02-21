@@ -100,6 +100,14 @@ pub struct TocArgs {
     #[arg(long, default_value = "**/*.md")]
     pub glob: String,
 
+    /// Generate cross-file TOC from files in this directory
+    #[arg(long)]
+    pub from_dir: Option<PathBuf>,
+
+    /// Automatically add TOC markers below the first H1 heading if not present
+    #[arg(long)]
+    pub add: bool,
+
     /// Do not modify files; exit non-zero if changes would be made
     #[arg(long)]
     pub check: bool,

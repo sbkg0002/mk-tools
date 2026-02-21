@@ -9,6 +9,7 @@ A powerful CLI tool for managing Markdown files with automatic code block synchr
 
 - **Code Block Synchronization**: Keep code blocks in your Markdown files in sync with actual source files
 - **Table of Contents Generation**: Automatically generate and update table of contents based on headings
+- **Cross-File TOC**: Generate a single TOC in one file from headings across multiple files in a directory
 - **CI/CD Integration**: Verify documentation is up-to-date in your CI pipeline
 - **Flexible Configuration**: Customize behavior with extensive options
 - **Fast & Reliable**: Written in Rust for performance and safety
@@ -64,18 +65,21 @@ mk-tools codeblocks README.md
 
 The code block will be automatically inserted/updated:
 
-```markdown
+````markdown
 # My Project
 
 Here's the main function:
 
 <!-- mk-code: ./src/main.rs -->
+
 ```rust
 fn main() {
     println!("Hello, world!");
 }
 ```
-```
+````
+
+````
 
 ### Generating Table of Contents
 
@@ -92,7 +96,7 @@ Add TOC markers in your Markdown:
 ### Configuration
 
 ## Advanced Usage
-```
+````
 
 Run mk-tools:
 
@@ -106,6 +110,7 @@ The TOC will be generated:
 # Documentation
 
 <!-- mk-toc:start -->
+
 - [Getting Started](#getting-started)
   - [Installation](#installation)
   - [Configuration](#configuration)
@@ -113,7 +118,9 @@ The TOC will be generated:
 <!-- mk-toc:end -->
 
 ## Getting Started
+
 ### Installation
+
 ### Configuration
 
 ## Advanced Usage
@@ -164,6 +171,9 @@ mk-tools codeblocks README.md
 # Process all Markdown files in a directory
 mk-tools codeblocks docs/
 
+# Process all Markdown files in current directory (default)
+mk-tools codeblocks
+
 # Process with custom root directory
 mk-tools codeblocks --root src docs/
 
@@ -186,6 +196,8 @@ mk-tools toc [OPTIONS] [PATHS]...
 
 - `--root <PATH>` - Base directory for resolving paths
 - `--glob <PATTERN>` - Glob pattern for Markdown files (default: `**/*.md`)
+- `--from-dir <DIR>` - Generate cross-file TOC from all files in this directory
+- `--add` - Automatically add TOC markers below the first H1 heading if not present
 - `--check` - Don't modify files; exit with error if updates are needed
 - `--no-backup` - Don't create `.bak` backup files
 - `--encoding <ENC>` - File encoding (default: `utf-8`)
@@ -199,8 +211,17 @@ mk-tools toc README.md
 # Update TOC in all documentation files
 mk-tools toc docs/
 
+# Process all Markdown files in current directory (default)
+mk-tools toc
+
 # Check if TOCs are up-to-date
 mk-tools toc --check docs/
+
+# Generate cross-file TOC in README.md from all files in docs/
+mk-tools toc README.md --from-dir docs/
+
+# Automatically add TOC markers to a file that doesn't have them yet
+mk-tools toc docs/guide.md --add
 ```
 
 #### `check` - Validate All
@@ -219,11 +240,14 @@ mk-tools check [OPTIONS] [PATHS]...
 **Examples:**
 
 ```bash
-# Check all Markdown files
-mk-tools check .
+# Check all Markdown files in current directory (default)
+mk-tools check
 
 # Check specific directory
 mk-tools check docs/
+
+# Check specific files
+mk-tools check README.md CONTRIBUTING.md
 ```
 
 ## Marker Syntax
@@ -306,8 +330,8 @@ name: Docs Check
 on:
   pull_request:
     paths:
-      - '**.md'
-      - 'src/**'
+      - "**.md"
+      - "src/**"
 
 jobs:
   check-docs:
@@ -373,6 +397,7 @@ Default mappings include:
 Keep your documentation in sync with working examples:
 
 **README.md:**
+
 ```markdown
 # My Library
 
@@ -389,37 +414,126 @@ The default configuration looks like this:
 <!-- mk-code: ./examples/config.toml -->
 ```
 
-Run: `mk-tools codeblocks README.md`
+Run: `mk-tools codeblocks` (or `mk-tools codeblocks README.md` for just that file)
 
 ### Example 2: Multi-file Documentation
 
 **docs/README.md:**
+
 ```markdown
 <!-- mk-toc:start from-level=2 -->
 <!-- mk-toc:end -->
 
 ## API Reference
+
 ## Getting Started
+
 ## Examples
 ```
 
 **docs/api.md:**
+
 ```markdown
 <!-- mk-toc:start from-level=2 to-level=3 -->
 <!-- mk-toc:end -->
 
 ## Functions
+
 ### authenticate()
+
 ### getData()
 ```
 
-Run: `mk-tools toc docs/`
+Run: `mk-tools toc` (processes all .md files in current directory and subdirectories)
 
-### Example 3: Partial Code Extraction
+### Example 3: Cross-File Table of Contents
+
+Generate a single TOC that indexes multiple files:
+
+**README.md:**
+
+```markdown
+# Project Documentation
+
+<!-- mk-toc:start -->
+<!-- mk-toc:end -->
+```
+
+**docs/api.md, docs/guide.md, etc.**
+
+Run: `mk-tools toc README.md --from-dir docs/`
+
+This generates a TOC in `README.md` with links to all headings in files within `docs/`:
+
+```markdown
+<!-- mk-toc:start -->
+
+- [API Overview](docs/api.md#api-overview)
+- [Authentication](docs/api.md#authentication)
+
+- [Getting Started](docs/guide.md#getting-started)
+- [Installation](docs/guide.md#installation)
+<!-- mk-toc:end -->
+```
+
+### Example 4: Quick TOC Setup with --add
+
+Automatically add TOC markers to an existing file:
+
+**Before (guide.md):**
+
+```markdown
+# User Guide
+
+Introduction to the system.
+
+## Getting Started
+
+Instructions here.
+
+## Advanced Topics
+
+More details.
+```
+
+Run: `mk-tools toc guide.md --add`
+
+**After (guide.md):**
+
+```markdown
+# User Guide
+
+<!-- mk-toc:start -->
+
+- [Getting Started](#getting-started)
+- [Advanced Topics](#advanced-topics)
+<!-- mk-toc:end -->
+
+Introduction to the system.
+
+## Getting Started
+
+Instructions here.
+
+## Advanced Topics
+
+More details.
+```
+
+The `--add` option:
+
+- Detects if TOC markers are missing
+- Automatically inserts them after the first H1 heading
+- If no H1 heading exists, inserts at the beginning
+- Generates the TOC immediately
+- Does nothing if markers already exist
+
+### Example 5: Partial Code Extraction
 
 Extract just the important parts of a file:
 
 **tutorial.md:**
+
 ```markdown
 Here's the key algorithm:
 

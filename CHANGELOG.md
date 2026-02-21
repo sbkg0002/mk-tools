@@ -8,26 +8,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Nothing yet
+
+- **Cross-File TOC Generation**: New `--from-dir` option for `toc` command
+  - Generate a single table of contents in one file from headings across multiple files
+  - `mk-tools toc README.md --from-dir docs/` creates a TOC in README.md with links to all files in docs/
+  - Automatically generates relative links with file paths (e.g., `[Heading](docs/file.md#heading)`)
+  - Useful for creating master TOC pages that index entire documentation directories
+- **Automatic TOC Marker Insertion**: New `--add` option for `toc` command
+  - Automatically inserts TOC markers (`<!-- mk-toc:start -->` / `<!-- mk-toc:end -->`) into files that don't have them
+  - `mk-tools toc file.md --add` adds markers below the first H1 heading and generates the TOC
+  - If no H1 heading exists, markers are inserted at the beginning of the file
+  - Only adds markers if they don't already exist - safe to run multiple times
+  - Immediately generates the TOC after adding markers
 
 ### Changed
-- Nothing yet
+
+- Commands now default to current directory when no paths are specified
+  - `mk-tools codeblocks` processes all Markdown files in current directory
+  - `mk-tools toc` processes all Markdown files in current directory
+  - `mk-tools check` processes all Markdown files in current directory
 
 ### Deprecated
+
 - Nothing yet
 
 ### Removed
+
 - Nothing yet
 
 ### Fixed
+
 - Nothing yet
 
 ### Security
+
 - Nothing yet
 
 ## [0.1.0] - 2024-01-XX
 
 ### Added
+
 - Initial release of mk-tools
 - **Code Block Synchronization**: Automatically sync code blocks in Markdown files with source files
   - Support for `mk-code` markers with HTML comment syntax
@@ -73,6 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Inline code documentation and tests
 
 ### Technical Details
+
 - Written in Rust for performance and reliability
 - Uses regex-based parsing for marker detection
 - Preserves file structure and formatting
@@ -80,6 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cross-platform compatibility (Linux, macOS, Windows)
 
 ### Known Limitations
+
 - Only UTF-8 encoding is supported
 - Named regions (`region` option) are reserved for future use
 - Cross-file TOCs are not yet supported
