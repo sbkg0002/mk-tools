@@ -325,6 +325,13 @@ fn process_toc_file(file_path: &Path, args: &TocArgs, dry_run: bool) -> Result<b
 
     log::debug!("Found {} TOC region(s)", regions.len());
 
+    // Override from_level if --include-h1 is set
+    if args.include_h1 {
+        for region in &mut regions {
+            region.options.from_level = 1;
+        }
+    }
+
     // Extract headings
     let headings = markdown::extract_headings(&content);
 
@@ -356,7 +363,7 @@ fn process_cross_file_toc(
     let content = fs::read_file(file_path)?;
 
     // Find TOC regions
-    let regions = markdown::find_toc_regions(&content)?;
+    let mut regions = markdown::find_toc_regions(&content)?;
 
     if regions.is_empty() {
         log::debug!("No TOC regions found in {}", file_path.display());
@@ -364,6 +371,13 @@ fn process_cross_file_toc(
     }
 
     log::debug!("Found {} TOC region(s)", regions.len());
+
+    // Override from_level if --include-h1 is set
+    if args.include_h1 {
+        for region in &mut regions {
+            region.options.from_level = 1;
+        }
+    }
 
     // Generate cross-file TOC
     let mut result = content.clone();

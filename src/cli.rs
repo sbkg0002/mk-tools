@@ -104,6 +104,10 @@ pub struct TocArgs {
     #[arg(long)]
     pub from_dir: Option<PathBuf>,
 
+    /// Include H1 headings from all files in the TOC
+    #[arg(long)]
+    pub include_h1: bool,
+
     /// Automatically add TOC markers below the first H1 heading if not present
     #[arg(long)]
     pub add: bool,
