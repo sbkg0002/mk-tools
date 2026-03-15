@@ -4,7 +4,7 @@ use std::path::PathBuf;
 #[derive(Parser, Debug)]
 #[command(
     name = "mk-tools",
-    version,
+    version = env!("BUILD_VERSION"),
     about = "A CLI tool for managing Markdown files"
 )]
 #[command(author, long_about = None)]
