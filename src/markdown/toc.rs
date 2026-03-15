@@ -120,10 +120,35 @@ fn parse_toc_options(options_str: &str) -> Result<TocOptions> {
 /// Extract all headings from markdown content
 pub fn extract_headings(content: &str) -> Vec<Heading> {
     let heading_regex = Regex::new(r"^(#{1,6})\s+(.+?)(?:\s*#*\s*)?$").unwrap();
+    let fence_regex = Regex::new(r"^(`{3,}|~{3,})").unwrap();
     let mut headings = Vec::new();
+    let mut in_code_block = false;
+    let mut fence_marker: Option<String> = None;
 
     for (line_idx, line) in content.lines().enumerate() {
         let line_number = line_idx + 1;
+
+        // Track fenced code blocks
+        if let Some(captures) = fence_regex.captures(line) {
+            let fence = captures.get(1).unwrap().as_str();
+            if in_code_block {
+                // Close only if the fence matches the opening fence character and length
+                if fence_marker.as_deref().map_or(false, |m| {
+                    fence.starts_with(&m[..1]) && fence.len() >= m.len()
+                }) {
+                    in_code_block = false;
+                    fence_marker = None;
+                }
+            } else {
+                in_code_block = true;
+                fence_marker = Some(fence.to_string());
+            }
+            continue;
+        }
+
+        if in_code_block {
+            continue;
+        }
 
         if let Some(captures) = heading_regex.captures(line) {
             let hashes = captures.get(1).unwrap().as_str();
